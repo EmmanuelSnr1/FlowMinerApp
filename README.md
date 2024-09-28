@@ -1,1 +1,1 @@
-# Java and Vue JS + Stanford OPEN NLP 
+# Java and Vue JS + Stanford Core NLP 
