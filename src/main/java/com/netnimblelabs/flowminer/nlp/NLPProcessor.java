@@ -8,13 +8,11 @@ package com.netnimblelabs.flowminer.nlp;
  *
  * @author admin
  */
-
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.util.*;
-
 
 import java.util.*;
+
 
 public class NLPProcessor {
 
@@ -23,7 +21,7 @@ public class NLPProcessor {
     public NLPProcessor() {
         // Set up a pipeline with the most common properties
         Properties props = new Properties();
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,depparse");
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma");
         this.pipeline = new StanfordCoreNLP(props);
     }
 
@@ -32,7 +30,7 @@ public class NLPProcessor {
         pipeline.annotate(document);
         return document;
     }
-    
+
     public List<CoreLabel> getTokens(CoreDocument document) {
         return document.tokens();
     }
@@ -43,6 +41,26 @@ public class NLPProcessor {
             lemmatizedText.append(token.lemma()).append(" ");
         }
         return lemmatizedText.toString().trim();
+    }
+
+    public String getLemmatizedTextFromString(String text) {
+        CoreDocument document = processText(text);
+        return getLemmatizedText(document);
+    }
+
+    /**
+     * Returns a list of lemmatized tokens from the input string.
+     *
+     * @param text The input text to process.
+     * @return A list of lemmatized tokens.
+     */
+    public List<String> getLemmatizedTokensFromString(String text) {
+        CoreDocument document = processText(text);
+        List<String> tokens = new ArrayList<>();
+        for (CoreLabel token : document.tokens()) {
+            tokens.add(token.lemma().toLowerCase());
+        }
+        return tokens;
     }
 }
 

@@ -91,6 +91,18 @@ public class ProcessDiscoveryResult implements Serializable  {
     public void setResponseJson(String responseJson) {
         this.responseJson = responseJson;
     }
+    @Lob
+    private String dfgEdgesJson;
+
+    // Getter and setter
+
+    public String getDfgEdgesJson() {
+        return dfgEdgesJson;
+    }
+
+    public void setDfgEdgesJson(String dfgEdgesJson) {
+        this.dfgEdgesJson = dfgEdgesJson;
+    }
 }
 
 

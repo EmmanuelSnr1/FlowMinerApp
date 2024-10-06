@@ -9,8 +9,13 @@ package com.netnimblelabs.flowminer.api;
  * @author admin
  */
 
+/**
+ * Resource class to handle NLP-based queries and actions.
+ */
+
+import com.netnimblelabs.flowminer.models.NLPQueryRequest;
+import com.netnimblelabs.flowminer.services.DatabaseService;
 import com.netnimblelabs.flowminer.services.NLPService;
-import com.netnimblelabs.flowminer.util.SessionUtil;
 import com.netnimblelabs.flowminer.services.PerformanceAnalysisService;
 import com.netnimblelabs.flowminer.services.ProcessDiscoveryService;
 import com.netnimblelabs.flowminer.services.ProcessMiningService;
@@ -19,61 +24,76 @@ import com.netnimblelabs.flowminer.services.RetrofitClient;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Resource class to handle NLP-based queries and actions.
- */
 @Path("/nlp")
 public class NLPResource {
 
     private NLPService nlpService;
 
     public NLPResource() {
-        // Initialize services (assuming dependencies are injected or otherwise initialized)
-        ProcessMiningService processMiningService = RetrofitClient.getClient("http://127.0.0.1:5000/")
+        // Initialize RetrofitClient
+        String baseUrl = "http://127.0.0.1:5000/";
+        RetrofitClient retrofitClient = new RetrofitClient();
+        ProcessMiningService processMiningService = retrofitClient.getClient(baseUrl)
                 .create(ProcessMiningService.class);
-        ProcessDiscoveryService discoveryService = new ProcessDiscoveryService(processMiningService);
-        PerformanceAnalysisService performanceService = new PerformanceAnalysisService(processMiningService);
-        this.nlpService = new NLPService(discoveryService, performanceService);
+
+        // Initialize services
+        DatabaseService databaseService = new DatabaseService();
+        ProcessDiscoveryService discoveryService = new ProcessDiscoveryService(processMiningService, databaseService);
+        PerformanceAnalysisService performanceService = new PerformanceAnalysisService(processMiningService, databaseService);
+
+        // Initialize NLPService with dependencies
+        this.nlpService = new NLPService(discoveryService, performanceService, databaseService);
     }
 
     /**
      * Endpoint to handle an NLP query and execute the appropriate action.
-     * 
-     * @param query The natural language query.
-     * @param processFileId The ID of the process file to operate on.
+     *
+     * @param request The NLP query request containing the query and process file ID.
      * @return Response indicating the result of the operation.
      */
     @POST
     @Path("/query")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response handleNLPQuery(@QueryParam("query") String query, @QueryParam("processFileId") Long processFileId) {
-        if (query == null || query.isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Query is required").build();
+    public Response handleNLPQuery(NLPQueryRequest request) {
+        String query = request.getQuery();
+        Long processFileId = request.getProcessFileId();
+
+        if (query == null || query.trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Parameter 'query' is required and cannot be empty.")
+                    .build();
         }
         if (processFileId == null) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Process file ID is required").build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Parameter 'processFileId' is required.")
+                    .build();
         }
 
         try {
-            nlpService.handleQuery(query, processFileId);
-            Map<String, String> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Query processed successfully.");
-            return Response.ok(response).build();
+            // Handle the query using NLPService
+            Map<String, Object> result = nlpService.handleQuery(query, processFileId);
+            return Response.ok(result).build();
+        } catch (UnsupportedOperationException e) {
+            // Log the exception
+            // logger.warn("Unsupported operation: {}", e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Unsupported query type: " + e.getMessage())
+                    .build();
         } catch (Exception e) {
+            // Log the exception
+            // logger.error("Error processing NLP query", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error processing query: " + e.getMessage())
+                    .entity("Internal server error occurred while processing the query.")
                     .build();
         }
     }
 
     /**
      * Test endpoint to verify NLPService is working.
-     * 
+     *
      * @return A simple success message.
      */
     @GET
@@ -84,3 +104,7 @@ public class NLPResource {
     }
 }
 
+
+
+
+//http://localhost:8080/flowminer/api/nlp

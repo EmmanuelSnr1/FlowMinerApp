@@ -12,9 +12,12 @@ import com.netnimblelabs.flowminer.models.BottleneckAnalysisResult;
 import com.netnimblelabs.flowminer.models.FrequencyAnalysisResult;
 import com.netnimblelabs.flowminer.models.ProcessFile;
 import com.netnimblelabs.flowminer.models.NLPQueryStatus;
+import com.netnimblelabs.flowminer.models.PerformanceAnalysisResult;
 import com.netnimblelabs.flowminer.models.PerformanceMapAnalysisResult;
 import com.netnimblelabs.flowminer.models.ProcessDiscoveryResult;
+import com.netnimblelabs.flowminer.models.ProcessOverviewResult;
 import com.netnimblelabs.flowminer.models.ResourceUtilizationAnalysisResult;
+import com.netnimblelabs.flowminer.services.DatabaseService;
 import com.netnimblelabs.flowminer.services.NLPService;
 import com.netnimblelabs.flowminer.util.SessionUtil;
 import org.deckfour.xes.in.XesXmlParser;
@@ -27,6 +30,11 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import org.deckfour.xes.model.XAttribute;
+import org.deckfour.xes.model.XAttributeLiteral;
+import org.deckfour.xes.model.XEvent;
+import org.deckfour.xes.model.XTrace;
 
 /**
  * Resource class to manage process files, NLP queries, and process analysis
@@ -35,7 +43,7 @@ import java.util.List;
 @Path("/resource")
 public class ProcessResources {
 
-    private static final String DIRECTORY = "/Users/admin/NetBeansProjects/flowminer/uploads/"; // Local directory where files are stored
+    private static final String DIRECTORY = "/Users/admin/NetBeansProjects/FlowMinerApp/uploads/"; // Local directory where files are stored
 
     // ----- File Management Endpoints -----
     /**
@@ -158,6 +166,19 @@ public class ProcessResources {
     }
 
     @GET
+    @Path("/overview-results/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getProcessOverviewResult(@PathParam("id") Long id) throws Exception {
+        ProcessOverviewResult overviewResult = (ProcessOverviewResult) SessionUtil.executeStatelessTransaction(session
+                -> session.get(ProcessOverviewResult.class, id)
+        );
+        if (overviewResult == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Process overview result not found").build();
+        }
+        return Response.ok(overviewResult).build();
+    }
+
+    @GET
     @Path("/discovery-results/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDiscoveryResult(@PathParam("id") Long id) throws Exception {
@@ -230,20 +251,124 @@ public class ProcessResources {
         });
         return Response.ok(results).build();
     }
+
+    @GET
+    @Path("/utilization-results/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUtilizationResult(@PathParam("id") Long id) throws Exception {
+        ResourceUtilizationAnalysisResult result = (ResourceUtilizationAnalysisResult) SessionUtil.executeStatelessTransaction(session -> {
+            return session.get(ResourceUtilizationAnalysisResult.class, id);
+        });
+        if (result == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Utilization result not found").build();
+        }
+        return Response.ok(result).build();
+    }
     
     @GET
-@Path("/utilization-results/{id}")
-@Produces(MediaType.APPLICATION_JSON)
-public Response getUtilizationResult(@PathParam("id") Long id) throws Exception {
-    ResourceUtilizationAnalysisResult result = (ResourceUtilizationAnalysisResult) SessionUtil.executeStatelessTransaction(session -> {
-        return session.get(ResourceUtilizationAnalysisResult.class, id);
-    });
-    if (result == null) {
-        return Response.status(Response.Status.NOT_FOUND).entity("Utilization result not found").build();
+    @Path("/process-files/{fileId}/overview-result")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getProcessOverviewResultForProcessFile(@PathParam("fileId") Long fileId) {
+        try {
+            ProcessOverviewResult result = new DatabaseService().getProcessOverviewResult(fileId);
+            if (result == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Overview result not found").build();
+            }
+            return Response.ok(result).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error fetching overview result: " + e.getMessage()).build();
+        }
     }
-    return Response.ok(result).build();
-}
 
+    @GET
+    @Path("/process-files/{fileId}/bottleneck-result")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getBottleneckResultForProcessFile(@PathParam("fileId") Long fileId) {
+        try {
+            BottleneckAnalysisResult result = new DatabaseService().getBottleneckAnalysisResult(fileId);
+            if (result == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Bottleneck result not found").build();
+            }
+            return Response.ok(result).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error fetching bottleneck result: " + e.getMessage()).build();
+        }
+    }
+
+    @GET
+    @Path("/process-files/{fileId}/case-duration-result")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCaseDurationResultForProcessFile(@PathParam("fileId") Long fileId) {
+        try {
+            PerformanceMapAnalysisResult result = new DatabaseService().getCaseDurationAnalysisResult(fileId);
+            if (result == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Case duration result not found").build();
+            }
+            return Response.ok(result).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error fetching case duration result: " + e.getMessage()).build();
+        }
+    }
+
+    @GET
+    @Path("/process-files/{fileId}/frequency-result")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getFrequencyResultForProcessFile(@PathParam("fileId") Long fileId) {
+        try {
+            FrequencyAnalysisResult result = new DatabaseService().getFrequencyAnalysisResult(fileId);
+            if (result == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Frequency result not found").build();
+            }
+            return Response.ok(result).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error fetching frequency result: " + e.getMessage()).build();
+        }
+    }
+
+    @GET
+    @Path("/process-files/{fileId}/utilization-result")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUtilizationResultForProcessFile(@PathParam("fileId") Long fileId) {
+        try {
+            ResourceUtilizationAnalysisResult result = new DatabaseService().getResourceUtilizationAnalysisResult(fileId);
+            if (result == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Utilization result not found").build();
+            }
+            return Response.ok(result).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error fetching utilization result: " + e.getMessage()).build();
+        }
+    }
+
+    @GET
+    @Path("/process-files/{fileId}/default-performance-result")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDefaultPerformanceResultForProcessFile(@PathParam("fileId") Long fileId) {
+        try {
+            PerformanceAnalysisResult result = new DatabaseService().getDefaultPerformanceAnalysisResult(fileId);
+            if (result == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Default performance result not found").build();
+            }
+            return Response.ok(result).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error fetching default performance result: " + e.getMessage()).build();
+        }
+    }
+
+    @GET
+    @Path("/process-files/{fileId}/discovery-result/{method}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDiscoveryResultByMethodForProcessFile(@PathParam("fileId") Long fileId, @PathParam("method") String method) {
+        try {
+            ProcessDiscoveryResult result = new DatabaseService().getProcessDiscoveryResultByMethod(fileId, method);
+            if (result == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Discovery result not found").build();
+            }
+            return Response.ok(result).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error fetching discovery result: " + e.getMessage()).build();
+        }
+    }
 
     // ----- Helper Methods -----
     /**
@@ -256,10 +381,52 @@ public Response getUtilizationResult(@PathParam("id") Long id) throws Exception 
     private int analyzeXesFile(String filePath) throws Exception {
         XesXmlParser parser = new XesXmlParser();
         File xesFile = new File(filePath);
-        if (parser.canParse(xesFile)) {
-            XLog log = parser.parse(xesFile).get(0);
-            return log.size(); // Assuming each log entry is a record
+
+        try {
+            // Check if the file can be parsed
+            if (parser.canParse(xesFile)) {
+                XLog log = parser.parse(xesFile).get(0);
+
+                int validTracesCount = 0;
+
+                // Iterate over traces
+                for (XTrace trace : log) {
+                    try {
+                        // Iterate over events within each trace
+                        for (XEvent event : trace) {
+                            // Check each event for attributes and skip if needed
+                            for (Map.Entry<String, XAttribute> attributeEntry : event.getAttributes().entrySet()) {
+                                XAttribute attribute = attributeEntry.getValue();
+
+                                // Handle literal attributes, particularly checking for "nan" or non-parsable values
+                                if (attribute instanceof XAttributeLiteral) {
+                                    String value = ((XAttributeLiteral) attribute).getValue();
+                                    if ("nan".equalsIgnoreCase(value)) {
+                                        System.out.println("NaN value found, skipping this event.");
+                                        continue; // Skip the event with "nan"
+                                    }
+                                }
+                            }
+                        }
+
+                        // If the trace is valid and no issues occurred, increment the count
+                        validTracesCount++;
+
+                    } catch (Exception e) {
+                        System.out.println("Error processing trace, skipping this trace: " + e.getMessage());
+                        // Optionally log the trace that caused the issue or continue with others
+                        continue; // Skip this trace and move to the next one
+                    }
+                }
+
+                return validTracesCount; // Return the number of valid traces (or records)
+            }
+        } catch (Exception e) {
+            // Catch and log any issues related to parsing the file
+            System.out.println("Error processing file: " + e.getMessage());
         }
-        return 0;
+
+        return 0; // Return 0 if the file cannot be parsed or no valid traces are found
     }
+
 }

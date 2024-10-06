@@ -21,6 +21,10 @@
         <mapping class="com.netnimblelabs.flowminer.models.ResourceUtilizationAnalysisResult"/>
         <mapping class="com.netnimblelabs.flowminer.models.FrequencyAnalysisResult"/>
         <mapping class="com.netnimblelabs.flowminer.models.BottleneckAnalysisResult"/>
+        <mapping class="com.netnimblelabs.flowminer.models.ProcessOverviewResult"/>
+        <mapping class="com.netnimblelabs.flowminer.models.QueryHistory"/>
+
+
 
 
 

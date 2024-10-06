@@ -20,7 +20,7 @@ public class PerformanceAnalysisService {
 
     private ProcessMiningService processMiningService;
 
-    public PerformanceAnalysisService(ProcessMiningService processMiningService) {
+    public PerformanceAnalysisService(ProcessMiningService processMiningService, DatabaseService databaseService) {
         this.processMiningService = processMiningService;
     }
 

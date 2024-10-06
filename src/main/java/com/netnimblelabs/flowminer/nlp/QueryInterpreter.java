@@ -22,32 +22,61 @@ public class QueryInterpreter {
         this.performanceService = performanceService;
     }
 
-    public void interpretAndExecute(CoreDocument document, Long processFileId) throws Exception {
-        String lemmatizedText = new NLPProcessor().getLemmatizedText(document);
+    /**
+     * Executes actions based on the query type.
+     *
+     * @param queryType The classified query type.
+     * @param processFileId The ID of the process file.
+     * @throws Exception if an error occurs during execution or if the query type is unsupported.
+     */
+    public void interpretAndExecute(String queryType, Long processFileId) throws Exception {
+        switch (queryType) {
+            // Process Discovery Actions
+            case "process discovery - alpha":
+                discoveryService.discoverProcessAndSaveAlpha(processFileId);
+                break;
+            case "process discovery - inductive":
+                discoveryService.discoverProcessAndSaveInductive(processFileId);
+                break;
+            case "process discovery - heuristics":
+                discoveryService.discoverProcessAndSaveHeuristics(processFileId);
+                break;
+            case "process discovery - bpmn inductive":
+                discoveryService.discoverProcessAndSaveBpmnInductive(processFileId);
+                break;
+            case "process discovery - dfg":
+                discoveryService.discoverProcessAndSaveDfg(processFileId);
+                break;
+//            case "process discovery":
+//                discoveryService.discoverProcessAndSaveDefault(processFileId); // Implement default discovery
+//                break;
 
-        // Process discovery queries
-        if (lemmatizedText.contains("discover") && lemmatizedText.contains("inductive")) {
-            discoveryService.discoverProcessAndSaveInductive(processFileId);
-        } else if (lemmatizedText.contains("discover") && lemmatizedText.contains("alpha")) {
-            discoveryService.discoverProcessAndSaveAlpha(processFileId);
-        } else if (lemmatizedText.contains("discover") && lemmatizedText.contains("heuristics")) {
-            discoveryService.discoverProcessAndSaveHeuristics(processFileId);
-        }
-        // Performance analysis queries
-        else if (lemmatizedText.contains("analyze") && lemmatizedText.contains("bottleneck")) {
-            performanceService.analyzeBottlenecksAndSave(processFileId);
-        } else if (lemmatizedText.contains("analyze") && (lemmatizedText.contains("case") || lemmatizedText.contains("duration"))) {
-            performanceService.analyzeCaseDurationAndSave(processFileId);
-        } else if (lemmatizedText.contains("analyze") && lemmatizedText.contains("frequency")) {
-            performanceService.analyzeFrequencyAndSave(processFileId);
-        } else if (lemmatizedText.contains("analyze") && lemmatizedText.contains("resource") && lemmatizedText.contains("utilization")) {
-            performanceService.analyzeResourceUtilizationAndSave(processFileId);
-        }
-        // Add more conditions for other types of analysis or queries as needed
-        else {
-            throw new UnsupportedOperationException("Query not recognized: " + lemmatizedText);
+            // Performance Analysis Actions
+            case "performance analysis - bottleneck":
+                performanceService.analyzeBottlenecksAndSave(processFileId);
+                break;
+            case "performance analysis - case duration":
+                performanceService.analyzeCaseDurationAndSave(processFileId);
+                break;
+            case "performance analysis - frequency":
+                performanceService.analyzeFrequencyAndSave(processFileId);
+                break;
+            case "performance analysis - resource utilization":
+                performanceService.analyzeResourceUtilizationAndSave(processFileId);
+                break;
+//            case "performance analysis":
+//                performanceService.analyzeDefaultPerformance(processFileId); // Implement default analysis
+//                break;
+
+            // Process Overview Action
+            case "process overview":
+                discoveryService.getProcessOverviewAndSave(processFileId);
+                break;
+
+            // Add more cases as needed for other query types
+
+            default:
+                throw new UnsupportedOperationException("Unsupported query type: " + queryType);
         }
     }
 }
-
-
