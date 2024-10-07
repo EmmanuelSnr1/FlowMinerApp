@@ -14,12 +14,15 @@ package com.netnimblelabs.flowminer.api;
  */
 
 import com.netnimblelabs.flowminer.models.NLPQueryRequest;
+import com.netnimblelabs.flowminer.models.ProcessFile;
 import com.netnimblelabs.flowminer.services.DatabaseService;
 import com.netnimblelabs.flowminer.services.NLPService;
 import com.netnimblelabs.flowminer.services.PerformanceAnalysisService;
 import com.netnimblelabs.flowminer.services.ProcessDiscoveryService;
 import com.netnimblelabs.flowminer.services.ProcessMiningService;
 import com.netnimblelabs.flowminer.services.RetrofitClient;
+import com.netnimblelabs.flowminer.util.SessionUtil;
+import java.util.List;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -89,6 +92,16 @@ public class NLPResource {
                     .entity("Internal server error occurred while processing the query.")
                     .build();
         }
+    }
+    
+    @GET
+    @Path("/history")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllQueryHistory() throws Exception {
+        List<ProcessFile> processFiles = SessionUtil.executeStatelessTransaction(session
+                -> session.createQuery("from QueryHistory").list()
+        );
+        return Response.ok(processFiles).build();
     }
 
     /**

@@ -1,6 +1,5 @@
 package com.netnimblelabs.flowminer.services;
 
-
 import com.netnimblelabs.flowminer.services.requests.PerformanceAnalysisRequest;
 import com.netnimblelabs.flowminer.services.responses.FrequencyAnalysisResponse;
 import com.netnimblelabs.flowminer.services.responses.PerformanceMapAnalysisResponse;
@@ -137,21 +136,32 @@ public class PerformanceAnalysisService {
     }
 
     private void analyzeAndSaveResourceUtilization(Long processFileId, PerformanceAnalysisRequest request) throws Exception {
+        // Call the service to analyze resource utilization
         Call<ResourceUtilizationAnalysisResponse> call = processMiningService.analyzeResourceUtilization(request);
         ResourceUtilizationAnalysisResponse response = executeWithRetry(call);
 
         if (response != null) {
+            // Initialize Gson for JSON conversion
             Gson gson = new Gson();
+
+            // Create a new result object
             ResourceUtilizationAnalysisResult result = new ResourceUtilizationAnalysisResult();
             result.setProcessFileId(processFileId);
-            result.setUtilizationMap(response.getUtilizationMap());
+
+            // Set the utilization map as a serialized JSON string
+            String utilizationMapJson = gson.toJson(response.getUtilizationMap());
+            result.setUtilizationMapJson(utilizationMapJson);
+
+            // Set the entire response as a serialized JSON string
             result.setResponseJson(gson.toJson(response));
 
+            // Insert the result into the database using stateless session
             SessionUtil.executeStatelessTransaction(session -> {
                 session.insert(result);
                 return null;
             });
 
+            // Log the serialized response JSON
             System.out.println("Resource Utilization Analysis Response: " + result.getResponseJson());
         }
     }

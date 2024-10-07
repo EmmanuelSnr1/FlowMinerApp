@@ -15,14 +15,15 @@ import java.util.Map;
 public class ResourceUtilizationAnalysisResponse {
     
     @SerializedName("utilization_map")
-    private Map<String, Integer> utilizationMap;
+    private Map<String, Double> utilizationMap; // Changed from Integer to Double
 
-    public Map<String, Integer> getUtilizationMap() {
+    // Getter and Setter
+
+    public Map<String, Double> getUtilizationMap() {
         return utilizationMap;
     }
 
-    public void setUtilizationMap(Map<String, Integer> utilizationMap) {
+    public void setUtilizationMap(Map<String, Double> utilizationMap) {
         this.utilizationMap = utilizationMap;
     }
 }
-

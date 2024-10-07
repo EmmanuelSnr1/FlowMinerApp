@@ -38,7 +38,7 @@ public class DatabaseService {
     // Fetch Case Duration Analysis Result
     public PerformanceMapAnalysisResult getCaseDurationAnalysisResult(Long processFileId) throws Exception {
         return (PerformanceMapAnalysisResult) SessionUtil.executeStatelessTransaction(session ->
-            session.createQuery("from CaseDurationAnalysisResult where processFileId = :fileId")
+            session.createQuery("from PerformanceMapAnalysisResult where processFileId = :fileId")
                    .setParameter("fileId", processFileId)
                    .uniqueResult()
         );
@@ -62,6 +62,7 @@ public class DatabaseService {
         );
     }
 
+//    TODO: Fix this later. Might cause problems
     // Fetch Default Performance Analysis Result
     public PerformanceAnalysisResult getDefaultPerformanceAnalysisResult(Long processFileId) throws Exception {
         return (PerformanceAnalysisResult) SessionUtil.executeStatelessTransaction(session ->
