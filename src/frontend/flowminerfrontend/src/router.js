@@ -3,6 +3,9 @@ import Base from './views/Base.vue'
 import Dashboard from './views/Dashboard.vue'
 import Analytics from './views/Analytics.vue';
 import Processfiles from './views/Processfiles.vue';
+import Demo from './views/Demo.vue';
+
+
 
 
 const routes = [
@@ -26,6 +29,11 @@ const routes = [
     path: '/process-files',
     name: 'process-files',
     component: Processfiles,
+  },
+  {
+    path: '/demo',
+    name: 'demo',
+    component: Demo,
   },
   
 ];

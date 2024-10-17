@@ -8,9 +8,10 @@ import SideBar from '../src/components/common/sidebar.vue';
   <div>
     <NavBar />
       <SideBar />
-    <router-view />
-    <!-- <Main></Main> -->
+    <Main></Main>
   </div>
+  <!-- <router-view /> -->
+
 </template>
 
 <style scoped></style>

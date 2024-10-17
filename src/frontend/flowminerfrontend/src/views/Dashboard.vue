@@ -25,11 +25,11 @@ onMounted(() => {
     processResourceStore.fetchPerformanceResults(1);
 
     nlpStore.testNLPService();
-    
+
 });
 </script>
 <template>
-    <main class="p-4 md:ml-64 h-auto pt-20">
+    <main class="p-4 md:ml-64 h-auto pt-5">
         <!-- Header Section -->
         <section id="dashboard-header" class="mb-6">
             <h3 class="mb-4 text-2md font-extrabold text-gray-900 dark:text-white md:text-5xl lg:text-6xl ">
@@ -37,9 +37,9 @@ onMounted(() => {
             </h3>
         </section>
         <!-- Process Frequency Chart Section -->
-    <section id="process-frequency-chart" class="container mx-auto px-4 mb-8">
-        <ProcessFrequencyChart />
-      </section>  
+        <section id="process-frequency-chart" class="container mx-auto px-4 mb-8">
+            <ProcessFrequencyChart />
+        </section>
 
         <!-- Tool Cards Section -->
         <section id="tool-cards" class="container mx-auto px-4 mt-8">
@@ -47,13 +47,13 @@ onMounted(() => {
         </section>
 
         <h1
-                class="mb-4 p-6 text-4xl text-center font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-                Statistics
-            </h1>
+            class="mb-4 p-6 text-4xl text-center font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+            Statistics
+        </h1>
         <!-- Cards Layout Section -->
         <section id="dashboard-cards"
             class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
-            
+
             <!-- Uploaded Files Card -->
             <div id="uploaded-files-card" class="flex flex-col">
                 <!-- Import and use ProcessFilesList.vue here -->
