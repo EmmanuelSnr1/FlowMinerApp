@@ -7,10 +7,18 @@ class NLPService extends RestService {
     super('/api/nlp'); // Base URL for the NLP API
   }
 
-  handleNLPQuery(query, processFileId, customError = 'Failed to handle NLP query') {
-    const params = { query, processFileId };
-    return this.genericPost('/query', {}, params, customError);
-  }
+  // Updated service method
+// Updated service method
+handleNLPQuery(query, processFileId, customError = 'Failed to handle NLP query') {
+  const data = {
+      query: query,
+      processFileId: processFileId
+  };
+  // Send the data as the request body
+  return this.genericPost('/query', data, {}, customError);
+}
+
+
 
   testNLPService(customError = 'Failed to test NLP service') {
     return this.genericGet('/test', {}, customError);

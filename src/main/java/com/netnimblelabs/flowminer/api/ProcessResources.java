@@ -315,7 +315,7 @@ public class ProcessResources {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFrequencyResultForProcessFile(@PathParam("fileId") Long fileId) {
         try {
-            FrequencyAnalysisResult result = new DatabaseService().getFrequencyAnalysisResult(fileId);
+            PerformanceMapAnalysisResult result = new DatabaseService().getFrequencyAnalysisResult(fileId);
             if (result == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Frequency result not found").build();
             }

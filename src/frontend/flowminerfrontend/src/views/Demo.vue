@@ -1,28 +1,55 @@
 <script setup>
-// Reactive state to manage chat input and messages
-import { ref } from 'vue';
+import { ref, watch, computed } from 'vue';
+import { useNLPStore } from '../store-nlp';
+import resultsMap from '../queryresults/resultsMap';
 
-const userInput = ref(''); // To hold user input for the query
-const chatHistory = ref([]); // To hold the chat history (user queries and system responses)
+const userInput = ref('');
+const chatHistory = ref([]);
+const nlpStore = useNLPStore();
+const processFileId = 2; // Hardcoded processFileId for this example
 
-// Dummy function to simulate query processing and response
 function sendQuery() {
     if (userInput.value.trim() !== '') {
         // Add user query to chat history
         chatHistory.value.push({ role: 'user', text: userInput.value });
 
-        // Simulate a response and add to chat history (can later replace this with real API call)
+        // Indicate that the query is being processed
         chatHistory.value.push({ role: 'system', text: 'Processing your request...' });
+
+        // Send the query to the NLP service
+        nlpStore.handleNLPQuery(userInput.value, processFileId);
 
         // Reset input field
         userInput.value = '';
     }
 }
 
-// Dummy function to clear chat (optional)
-function clearChat() {
-    chatHistory.value = [];
-}
+// Watch for changes in queryStatus and update the chat history once a response is received
+watch(() => nlpStore.queryStatus, (newStatus) => {
+    if (newStatus && !nlpStore.error) {
+        // Once a response is received, remove "Processing" message
+        chatHistory.value.pop();
+
+        // Add the response to the chat
+        chatHistory.value.push({
+            role: 'system',
+            text: 'Query processed successfully. Please check the results section below.'
+        });
+    } else if (nlpStore.error) {
+        // Handle errors
+        chatHistory.value.pop(); // Remove the "Processing" message
+        chatHistory.value.push({ role: 'system', text: `Error: ${nlpStore.error}` });
+    }
+});
+
+// Dynamically resolve the component based on queryType from the result
+const resolvedComponent = computed(() => {
+    if (nlpStore.queryStatus && nlpStore.queryStatus.queryType) {
+        const queryType = nlpStore.queryStatus.queryType;
+        return resultsMap[queryType] || resultsMap['default']; // Default if queryType isn't found
+    }
+    return null;
+});
 </script>
 
 <template>
@@ -44,8 +71,7 @@ function clearChat() {
                         <span class="bg-blue-500 text-white p-2 rounded-lg">{{ message.text }}</span>
                     </div>
                     <div v-else class="text-left">
-                        <span class="bg-gray-300 dark:bg-gray-700 text-black dark:text-white p-2 rounded-lg">{{
-                            message.text }}</span>
+                        <span class="bg-gray-300 dark:bg-gray-700 text-black dark:text-white p-2 rounded-lg">{{ message.text }}</span>
                     </div>
                 </div>
             </div>
@@ -64,16 +90,24 @@ function clearChat() {
             </div>
         </section>
 
-        <!-- Result display section (This will later be populated with data like tables, BPMNs, etc.) -->
+        <!-- Result display section -->
         <section id="result-section" class="mt-10">
-            <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md h-64">
-                <!-- Placeholder for results -->
-                <p class="text-gray-500 dark:text-gray-400">Results will be displayed here...</p>
+            <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md h-auto">
+                <template v-if="resolvedComponent && nlpStore.queryStatus.result">
+                    <!-- Dynamically render the component based on queryType -->
+                    <component 
+                      :is="resolvedComponent" 
+                      :result="nlpStore.queryStatus.result"
+                    ></component>
+                </template>
+                <template v-else>
+                    <p class="text-gray-500 dark:text-gray-400">Results will be displayed here once available...</p>
+                </template>
             </div>
         </section>
     </main>
 </template>
 
 <style>
-/* You can add any additional styles here */
+/* Add any additional styles here */
 </style>

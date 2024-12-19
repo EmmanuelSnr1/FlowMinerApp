@@ -24,13 +24,18 @@ class RestService {
 
   async genericPost(endpoint, data = {}, params = {}, customError = 'Error occurred during POST request') {
     try {
-      const response = await this.apiClient.post(endpoint, data, { params });
-      return response.data;
+        // Axios post request with body data
+        const response = await this.apiClient.post(endpoint, data, {
+            params: params // Params if needed, though they're not used here
+        });
+        return response.data;
     } catch (error) {
-      console.error(customError, error);
-      throw new Error(customError);
+        console.error(customError, error);
+        throw new Error(customError);
     }
-  }
+}
+
+
 
   async genericPut(endpoint, data = {}, params = {}, customError = 'Error occurred during PUT request') {
     try {

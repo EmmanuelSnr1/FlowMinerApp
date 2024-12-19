@@ -45,9 +45,9 @@ public class DatabaseService {
     }
 
     // Fetch Frequency Analysis Result
-    public FrequencyAnalysisResult getFrequencyAnalysisResult(Long processFileId) throws Exception {
-        return (FrequencyAnalysisResult) SessionUtil.executeStatelessTransaction(session ->
-            session.createQuery("from FrequencyAnalysisResult where processFileId = :fileId")
+    public PerformanceMapAnalysisResult getFrequencyAnalysisResult(Long processFileId) throws Exception {
+        return (PerformanceMapAnalysisResult) SessionUtil.executeStatelessTransaction(session ->
+            session.createQuery("from PerformanceMapAnalysisResult where processFileId = :fileId")
                    .setParameter("fileId", processFileId)
                    .uniqueResult()
         );

@@ -60,6 +60,10 @@ public class NLPService {
                 new HashSet<>(Arrays.asList("discover")),
                 new HashSet<>(Arrays.asList("alpha"))
         ));
+        intentDefinitions.put("process discovery - bpmn inductive", new IntentDefinition(
+                new HashSet<>(Arrays.asList("discover", "bpmn")),
+                new HashSet<>(Arrays.asList("inductive"))
+        ));
         intentDefinitions.put("process discovery - inductive", new IntentDefinition(
                 new HashSet<>(Arrays.asList("discover")),
                 new HashSet<>(Arrays.asList("inductive"))
@@ -68,10 +72,7 @@ public class NLPService {
                 new HashSet<>(Arrays.asList("discover")),
                 new HashSet<>(Arrays.asList("heuristics"))
         ));
-        intentDefinitions.put("process discovery - bpmn inductive", new IntentDefinition(
-                new HashSet<>(Arrays.asList("discover", "bpmn")),
-                new HashSet<>(Arrays.asList("inductive"))
-        ));
+        
         intentDefinitions.put("process discovery - dfg", new IntentDefinition(
                 new HashSet<>(Arrays.asList("discover")),
                 new HashSet<>(Arrays.asList("dfg"))
@@ -251,16 +252,17 @@ public class NLPService {
             // Process Discovery Results
             case "process discovery - alpha":
                 return databaseService.getProcessDiscoveryResultByMethod(processFileId, "alpha");
+            case "process discovery - bpmn inductive":
+                return databaseService.getProcessDiscoveryResultByMethod(processFileId, "bpmn inductive");
             case "process discovery - inductive":
                 return databaseService.getProcessDiscoveryResultByMethod(processFileId, "inductive");
             case "process discovery - heuristics":
                 return databaseService.getProcessDiscoveryResultByMethod(processFileId, "heuristics");
-            case "process discovery - bpmn inductive":
-                return databaseService.getProcessDiscoveryResultByMethod(processFileId, "bpmn inductive");
+
             case "process discovery - dfg":
                 return databaseService.getProcessDiscoveryResultByMethod(processFileId, "dfg");
             case "process discovery":
-                return databaseService.getProcessDiscoveryResultByMethod(processFileId, "default");
+                return databaseService.getProcessDiscoveryResultByMethod(processFileId, "dfg");
 
             // Add more cases as needed
             default:
